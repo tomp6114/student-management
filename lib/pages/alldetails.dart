@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:student_management/pages/image_view.dart';
@@ -42,22 +43,19 @@ class AllDetails extends StatelessWidget {
                     style: TextStyle(fontSize: 25, color: kOrangeColor))
                 : GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ViewImage(
-                                    imagepath: obj[index].imagePath,
-                                  )));
+                      Get.to(ViewImage(
+                        imagepath: obj[index].imagePath,
+                      ));
                     },
                     child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(5)),
-                        child: Image.file(
-                          File(obj[index].imagePath),
-                          width: 250,
-                          height: 250,
-                          fit: BoxFit.cover,
-                        )),
+                      borderRadius: const BorderRadius.all(Radius.circular(5)),
+                      child: Image.file(
+                        File(obj[index].imagePath),
+                        width: 250,
+                        height: 250,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
           ),
           const SizedBox(
@@ -101,17 +99,20 @@ class AllDetails extends StatelessWidget {
                   kHeight5,
                   Text(
                     obj[index].currentClass.toString(),
-                    style: GoogleFonts.montserrat(fontSize: 22, color: kOrangeColor),
+                    style: GoogleFonts.montserrat(
+                        fontSize: 22, color: kOrangeColor),
                   ),
                   kHeight12,
                   Text(
                     obj[index].age.toString(),
-                    style: GoogleFonts.montserrat(fontSize: 22, color: kOrangeColor),
+                    style: GoogleFonts.montserrat(
+                        fontSize: 22, color: kOrangeColor),
                   ),
                   kHeight12,
                   Text(
                     obj[index].place,
-                    style: GoogleFonts.montserrat(fontSize: 22, color: kOrangeColor),
+                    style: GoogleFonts.montserrat(
+                        fontSize: 22, color: kOrangeColor),
                   ),
                 ],
               )

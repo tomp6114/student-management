@@ -1,71 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'dart:core';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:student_management/controller/controller.dart';
 import 'package:student_management/pages/image_view.dart';
 import 'package:student_management/widgets/constants.dart';
 import '../model/student.dart';
 import '../widgets/baseappbar.dart';
 import '../main.dart';
+import '../widgets/snackbars.dart';
 
-class Edit extends StatefulWidget {
+class Edit extends StatelessWidget {
   var box = Hive.box<Student>(boxName);
   final List<Student> obj;
   final int index;
-  Edit({Key? key, required this.obj, required this.index,}) : super(key: key);
+  Edit({
+    Key? key,
+    required this.obj,
+    required this.index,
+  }) : super(key: key);
 
-  @override
-  _EditState createState() => _EditState();
-}
+  //StudentController s = StudentController();
 
-class _EditState extends State<Edit> {
   TextEditingController nameController = TextEditingController();
   TextEditingController ageController = TextEditingController();
   TextEditingController classController = TextEditingController();
   TextEditingController placeController = TextEditingController();
-  XFile? _image;
-  dynamic _imagePath;
+  // XFile? _image;
+  String imagePath = '';
   final formKey = GlobalKey<FormState>();
   int? newindex;
   int? newkey;
   int? accesskey;
 
   prefilledDetails() {
-    nameController.text = widget.obj[widget.index].name;
-    ageController.text = widget.obj[widget.index].age.toString();
-    classController.text = widget.obj[widget.index].currentClass.toString();
-    placeController.text = widget.obj[widget.index].place;
-    _imagePath = widget.obj[widget.index].imagePath;
-    newkey = widget.obj[widget.index].key;
-    List<Student> hello = widget.box.values.toList();
-    for(int i=0;i<hello.length;i++){
-      if(hello[i].key==newkey){
+    nameController.text = obj[index].name;
+    ageController.text = obj[index].age.toString();
+    classController.text = obj[index].currentClass.toString();
+    placeController.text = obj[index].place;
+    imagePath = obj[index].imagePath;
+    newkey = obj[index].key;
+
+    List<Student> hello = box.values.toList();
+    for (int i = 0; i < hello.length; i++) {
+      if (hello[i].key == newkey) {
         accesskey = i;
         break;
       }
     }
-
   }
 
-  Future getImage() async {
-    final ImagePicker image = ImagePicker();
-    _image = await image.pickImage(source: ImageSource.gallery);
-    if (_image != null) {
-      setState(() {});
-      _imagePath = _image!.path;
-    }
-    return null;
-  }
-
-  @override
-  void initState() {
-    prefilledDetails();
-    super.initState();
-  }
+  // Future getImage() async {
+  //   final ImagePicker image = ImagePicker();
+  //   _image = await image.pickImage(source: ImageSource.gallery);
+  //   if (_image != null) {
+  //     imagePath = _image!.path;
+  //   }
+  //   return null;
+  // }
+  final StudentController _image = Get.find();
 
   @override
   Widget build(BuildContext context) {
+    prefilledDetails();
     return Scaffold(
       backgroundColor: kBalckColor,
       appBar: BaseAppBar(
@@ -81,45 +81,45 @@ class _EditState extends State<Edit> {
               SizedBox(
                 height: MediaQuery.of(context).size.height * .01,
               ),
-              Stack(
-                children: [
-                  _imagePath == null
-                      ? const CircleAvatar(
-                          radius: 75,
-                          backgroundColor: Colors.grey,
-                          child: Text(
-                            "Add Image",
-                            style: TextStyle(color: kOrangeColor),
+              GetBuilder<StudentController>(
+                builder: (controller) {
+                  print("...........................${controller.imagePath}");
+                  return Stack(
+                    children: [
+                      (controller.imagePath == null)
+                          ? const CircleAvatar(
+                              child: Center(
+                                child: Text("Add Image"),
+                              ),
+                              radius: 80,
+                            )
+                          : ClipOval(
+                              child: Image.file(
+                                File(controller.imagePath!),
+                                width: 150,
+                                height: 150,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: CircleAvatar(
+                          backgroundColor: kOrangeColor,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.edit,
+                              color: kBalckColor,
+                            ),
+                            onPressed: () {
+                              controller.getImage();
+                            },
                           ),
-                        )
-                      : GestureDetector(
-                    onTap: (){
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context)=> ViewImage(imagepath: _imagePath)));
-                    },
-                        child: ClipOval(
-                            child: Image.file(
-                            File(_imagePath),
-                            width: 150,
-                            height: 150,
-                            fit: BoxFit.cover,
-                          )),
-                      ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: CircleAvatar(
-                      backgroundColor: kOrangeColor,
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.edit,
-                          color: kBalckColor,
                         ),
-                        onPressed: getImage,
                       ),
-                    ),
-                  ),
-                ],
+                    ],
+                  );
+                },
               ),
               SizedBox(
                 height: MediaQuery.of(context).size.width * 5 / 100,
@@ -127,8 +127,7 @@ class _EditState extends State<Edit> {
               SizedBox(
                 width: MediaQuery.of(context).size.width * 80 / 100,
                 child: TextFieldCustom(
-                  onChanged: (value) {
-                  },
+                  onChanged: (value) {},
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "please enter name";
@@ -156,8 +155,7 @@ class _EditState extends State<Edit> {
                     width: MediaQuery.of(context).size.width * 35 / 100,
                     child: TextFieldCustom(
                       keyboard: TextInputType.number,
-                      onChanged: (value) {
-                      },
+                      onChanged: (value) {},
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return "please enter age";
@@ -181,8 +179,7 @@ class _EditState extends State<Edit> {
                     width: MediaQuery.of(context).size.width * 35 / 100,
                     child: TextFieldCustom(
                       keyboard: TextInputType.number,
-                      onChanged: (value) {
-                      },
+                      onChanged: (value) {},
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return "please enter class";
@@ -207,8 +204,7 @@ class _EditState extends State<Edit> {
               SizedBox(
                 width: MediaQuery.of(context).size.width * 80 / 100,
                 child: TextFieldCustom(
-                  onChanged: (value) {
-                  },
+                  onChanged: (value) {},
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "please enter place";
@@ -229,44 +225,49 @@ class _EditState extends State<Edit> {
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * .35,
-                    child: ElevatedButton(
-                      style:ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(kBalckColor),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                            side: BorderSide(
+                    child: GetBuilder<StudentController>(
+                     
+                      builder: (control) {
+                        return ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(kBalckColor),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5)),
+                                side: BorderSide(
+                                  color: Color.fromARGB(255, 89, 151, 39),
+                                ),
+                              ),
+                            ),
+                          ),
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              box.putAt(
+                                accesskey!,
+                                updateStudent(),
+                              );
+                              control.update();
+                              Get.back();
+                              Get.snackbar(
+                                "Message",
+                                "Student edited Successfully",
+                                borderRadius: 10,
+                                colorText: kGreenColor,
+                              );
+                            }
+                          },
+                          child: const Text(
+                            "Save",
+                            style: TextStyle(
+                              fontSize: 16,
                               color: Color.fromARGB(255, 89, 151, 39),
                             ),
                           ),
-                        ),
-                      ),
-                      onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                            widget.box.putAt(
-                                accesskey!,
-                                Student(
-                                    name: nameController.text,
-                                    age: int.parse(ageController.text),
-                                    currentClass: int.parse(classController.text),
-                                    place: placeController.text,
-                                    imagePath: _imagePath));
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content:
-                                      Text("Student edited Successfully")));
-                        }
+                        );
                       },
-                      child: const Text(
-                        "Save",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color.fromARGB(255, 89, 151, 39),
-                        ),
-                      ),
                     ),
                   ),
                   SizedBox(
@@ -275,7 +276,7 @@ class _EditState extends State<Edit> {
                   SizedBox(
                     width: MediaQuery.of(context).size.width * .35,
                     child: ElevatedButton(
-                        style: ButtonStyle(
+                      style: ButtonStyle(
                         backgroundColor:
                             MaterialStateProperty.all<Color>(kBalckColor),
                         shape:
@@ -288,38 +289,14 @@ class _EditState extends State<Edit> {
                           ),
                         ),
                       ),
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text("Delete"),
-                                  content: const Text("Do you want to delete it?"),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text("No")),
-                                    TextButton(
-                                        onPressed: () {
-                                          widget.obj[widget.index].delete();
-                                          Navigator.pop(context);
-                                          Navigator.pop(context);
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(const SnackBar(
-                                                  content: Text(
-                                                      "Student deleted Successfully")));
-                                        },
-                                        child:const  Text("Yes"))
-                                  ],
-                                );
-                              });
-                        },
-                        child: const Text(
-                          "Delete",
-                          style: TextStyle(color: kRedColor, fontSize: 16),
-                        )),
+                      onPressed: () {
+                        deleteStudentDialog();
+                      },
+                      child: const Text(
+                        "Delete",
+                        style: TextStyle(color: kRedColor, fontSize: 16),
+                      ),
+                    ),
                   )
                 ],
               )
@@ -327,6 +304,40 @@ class _EditState extends State<Edit> {
           ),
         ),
       ),
+    );
+  }
+
+  Student updateStudent() {
+    return Student(
+      name: nameController.text,
+      age: int.parse(ageController.text),
+      currentClass: int.parse(classController.text),
+      place: placeController.text,
+      imagePath: _image.imagePath,
+    );
+  }
+
+  Future<dynamic> deleteStudentDialog() {
+    return Get.defaultDialog(
+      title: "Delete",
+      titleStyle: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+      middleText: "Do you want to delete it ?",
+      middleTextStyle: GoogleFonts.montserrat(),
+      actions: [
+        TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text("No")),
+        TextButton(
+          onPressed: () {
+            obj[index].delete();
+            Get.back();
+            deleteStudentSnackbar();
+          },
+          child: const Text("Yes"),
+        )
+      ],
     );
   }
 }

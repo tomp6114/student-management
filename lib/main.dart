@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:student_management/pages/splash_screen.dart';
@@ -19,7 +20,7 @@ class StudentManagement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme:ThemeData(
         textTheme: TextTheme(bodyMedium: GoogleFonts.montserrat(color:kWhiteColor)),

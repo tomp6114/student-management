@@ -1,25 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:student_management/widgets/constants.dart';
 
 import 'homepage.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
 
   const SplashScreen({Key? key}) : super(key: key);
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    toHomeScreen();
-    super.initState();
-  }
-  @override
   Widget build(BuildContext context) {
+    toHomeScreen();
     return  Scaffold(
       backgroundColor: kWhiteColor,
       body: Center(
@@ -46,10 +38,9 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> toHomeScreen() async{
-    await Future.delayed(const Duration(seconds: 10),()
+    await Future.delayed(const Duration(seconds: 3),()
     {
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomePage()));
+      Get.to(const HomePage());
     });
   }
 }

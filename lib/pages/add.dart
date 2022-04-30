@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'dart:core';
@@ -7,33 +7,29 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:student_management/pages/image_view.dart';
 import 'package:student_management/widgets/constants.dart';
+import '../controller/controller.dart';
 import '../model/student.dart';
 import '../widgets/baseappbar.dart';
 import '../main.dart';
+import '../widgets/snackbars.dart';
 
-class Details extends StatefulWidget {
-  const Details({Key? key}) : super(key: key);
+class Details extends StatelessWidget {
+  Details({Key? key}) : super(key: key);
 
-  @override
-  State<Details> createState() => _DetailsState();
-}
-
-class _DetailsState extends State<Details> {
   var box = Hive.box<Student>(boxName);
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   final TextEditingController classController = TextEditingController();
   final TextEditingController placeController = TextEditingController();
   XFile? _image;
-  dynamic _imagePath;
+  dynamic imagePath;
   final formKey = GlobalKey<FormState>();
 
   Future getImage() async {
     final ImagePicker image = ImagePicker();
     _image = await image.pickImage(source: ImageSource.gallery);
     if (_image != null) {
-      setState(() {});
-      _imagePath = _image!.path;
+      imagePath = _image!.path;
     }
     return null;
   }
@@ -68,19 +64,16 @@ class _DetailsState extends State<Details> {
                         )
                       : GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ViewImage(imagepath: _imagePath)));
+                            Get.to(ViewImage(imagepath: imagePath));
                           },
                           child: ClipOval(
-                              child: Image.file(
-                            File(_imagePath),
-                            width: 150,
-                            height: 150,
-                            fit: BoxFit.cover,
-                          )),
+                            child: Image.file(
+                              File(imagePath),
+                              width: 150,
+                              height: 150,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                   Positioned(
                     bottom: 0,
@@ -156,13 +149,13 @@ class _DetailsState extends State<Details> {
                       keyboard: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return "please enter class";
+                          return "Please enter class";
                         } else {
                           if (RegExp(r'^[0-9]*$').hasMatch(value) &&
                               value.length < 3) {
                             return null;
                           } else {
-                            return "invalid input";
+                            return "Invalid input";
                           }
                         }
                       },
@@ -180,7 +173,7 @@ class _DetailsState extends State<Details> {
                 child: TextFieldCustom(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "please enter place";
+                      return "Please enter place";
                     }
                     return null;
                   },
@@ -193,6 +186,49 @@ class _DetailsState extends State<Details> {
               ),
               Row(
                 children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * .1,
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * .35,
+                    child: GetBuilder<StudentController>(
+                      builder: (control) {
+                        return ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(kBalckColor),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5)),
+                                side: BorderSide(
+                                  color: Color.fromARGB(255, 89, 151, 39),
+                                ),
+                              ),
+                            ),
+                          ),
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              box.add(
+                                addStudent(),
+                              );
+                              control.update();
+                              Get.back();
+                              studentAddedSnackBar();
+                            }
+                          },
+                          child: Text(
+                            "Save",
+                            style: GoogleFonts.montserrat(
+                              fontSize: 16,
+                              color: kOrangeColor,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * .1,
                   ),
@@ -213,58 +249,14 @@ class _DetailsState extends State<Details> {
                         ),
                       ),
                       onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          box.add(Student(
-                              name: nameController.text,
-                              age: int.parse(ageController.text),
-                              currentClass: int.parse(classController.text),
-                              place: placeController.text,
-                              imagePath: _imagePath));
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Student Added Successfully"),
-                            ),
-                          );
-                        }
+                        Get.back();
                       },
                       child: Text(
-                        "Save",
+                        "Back",
                         style: GoogleFonts.montserrat(
-                          fontSize: 16,
-                          color: kOrangeColor,
-                        ),
+                            color: kOrangeColor, fontSize: 16),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * .1,
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * .35,
-                    child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(kBalckColor),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            const RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5)),
-                              side: BorderSide(
-                                color: Color.fromARGB(255, 89, 151, 39),
-                              ),
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          "Back",
-                          style: GoogleFonts.montserrat(
-                              color: kOrangeColor, fontSize: 16),
-                        )),
                   )
                 ],
               )
@@ -272,6 +264,16 @@ class _DetailsState extends State<Details> {
           ),
         ),
       ),
+    );
+  }
+
+  Student addStudent() {
+    return Student(
+      name: nameController.text,
+      age: int.parse(ageController.text),
+      currentClass: int.parse(classController.text),
+      place: placeController.text,
+      imagePath: imagePath,
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-Icon cusIcon = const Icon(Icons.search);
-Widget cusSearchBar = const Text("Student Management");
+//Icon cusIcon = const Icon(Icons.search);
+//Widget cusSearchBar = const Text("Student Management");
 const kHeight10 = SizedBox(
   height: 10,
 );
@@ -19,3 +19,4 @@ const kDeepOrange = Colors.deepOrangeAccent;
 const kHeight12 = SizedBox(height: 12);
 const kHeight5 = SizedBox(height: 5);
 const kRedColor =Colors.red;
+const kGreenColor = Color.fromARGB(255, 93, 189, 97);
